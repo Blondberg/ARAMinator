@@ -4,11 +4,12 @@ from dotenv import load_dotenv
 from discord.ext import commands
 import logging
 import datetime
-import platform 
+import platform
+from db.database import init_db
 
 load_dotenv()
-DISCORD_TOKEN=os.getenv("DISCORD_TOKEN")
-BOT_PREFIX=os.getenv("BOT_PREFIX")
+DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
+BOT_PREFIX = os.getenv("BOT_PREFIX")
 
 # Setup logger
 logger = logging.getLogger("araminator")
@@ -21,53 +22,53 @@ handler = logging.FileHandler(
 handler.setFormatter(logging.Formatter("%(asctime)s :: %(levelname)-7s :: %(message)s"))
 logger.addHandler(handler)
 
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+logger.addHandler(console)
+
 bot = discord.Bot()
+
 intents = discord.Intents.default()
 intents.message_content = True
 intents.typing = True
 intents.members = True
 
-EXTENSIONS = []
+# initialize database
+init_db()
+
+EXTENSIONS = ["cogs.player_commands"]
+
+# Load in all extensions (cogs)
+for extension in EXTENSIONS:
+    try:
+        logger.debug(f"Loading extension '{extension}'.")
+        bot.load_extension(extension)
+        logger.debug(f"Extension '{extension}' loaded.")
+    except Exception as e:
+        logger.exception(e)
+
 
 @bot.event
 async def on_ready():
-    """"Log platform information and load extensions (cogs) when bot is ready"""
-    print(f"Logged in as: {bot.user.name}")
-    print(f"Python version: {platform.python_version()}")
-    print(f"System OS: {platform.system()} {platform.release()}")
+    """Log platform information and load extensions (cogs) when bot is ready"""
     logger.info(f"Logged in as: {bot.user.name}")
     logger.info(f"Python version: {platform.python_version()}")
     logger.info(f"System OS: {platform.system()} {platform.release()}")
-    
-    # Load in all extensions (cogs)
-    for extension in EXTENSIONS:
-        try:
-            await bot.load_extension(extension)
-            logger.debug(f"Loading extension '{extension}'.")
-            bot.load_extension(f"cogs.{extension}")
-            logger.debug(f"Extension '{extension}' loaded.")
-        except Exception as e: 
-            logger.error(e)
-
     logger.info("Bot is ready!")
 
 
 @bot.event
-async def on_application_command(ctx): 
-    """Executed before every command
-
-    Args:
-        ctx (commands.Context): Context of the command
-    """
+async def on_application_command(ctx):
+    """Executed before every command. Logs command invoked, author and target guild"""
     logger.debug(
         f"Command invoked '{ctx.command}' in guild {ctx.guild.name} (ID: {ctx.guild.id}) by {ctx.author} (ID: {ctx.author.id})"
     )
-    
+
 
 # Run the bot
-try: 
+try:
     bot.run(DISCORD_TOKEN, reconnect=True)
-except Exception as e: 
+except Exception as e:
     logger.error(f"Bot crashed with error: {e}")
     print("An error has occured. Check logs.")
     input("Press Enter to exit")
