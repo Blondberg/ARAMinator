@@ -1,34 +1,28 @@
-# import sqlite3
-# conn = sqlite3.connect('araminator.db')
-
-# cur = conn.cursor()
-
-# cur.execute('CREATE TABLE IF NOT EXISTS guild(id INTEGER PRIMARY KEY)')
-
-
-# res = cur.execute("SELECT * FROM guild")
 import os
-from dotenv import load_dotenv
-import mysql.connector
-load_dotenv()
+import sys
+from urllib3.exceptions import NameResolutionError
+from requests.exceptions import ConnectionError
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from db.database import get_db_connection
+from utils.riot_api import (
+    fetch_free_champion_rotation,
+    fetch_champion_data,
+    fetch_condensed_champion_data,
+    fetch_champion_tile_images,
+)
 
 
-DB_HOST=os.environ.get("DB_HOST")
-DB_ROOT_USERNAME=os.getenv("DB_ROOT_USERNAME")
-DB_ROOT_PASSWORD=os.getenv("DB_ROOT_PASSWORD")
+def display_champions():
+    db_connection = get_db_connection()
+    cursor = db_connection.cursor()
 
-def db_connect():
-    try:
-        db = mysql.connector.connect(
-            host=DB_HOST,
-            user=DB_ROOT_USERNAME, 
-            password=DB_ROOT_PASSWORD,
-        )
-        with db.cursor() as cursor: 
-            cursor.execute("CREATE DATABASE IF NOT EXISTS Araminator")
-    except mysql.connector.Error as e: 
-        print(e)
+    cursor.execute(f"SELECT * FROM champion")
+    champions = cursor.fetchall()
+
+    return champions
 
 
-if __name__ == "__main__": 
-    db_connect()
+if __name__ == "__main__":
+    print(display_champions())

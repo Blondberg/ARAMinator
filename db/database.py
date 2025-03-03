@@ -11,7 +11,7 @@ DB_TABLE = os.getenv("DB_TABLE")
 
 
 def create_database():
-    """Connect to MySQL server and create databse if missing."""
+    """Connect to MySQL server and create database if missing."""
     db_connection = mysql.connector.connect(
         host=DB_HOST, user=DB_ROOT_USERNAME, password=DB_ROOT_PASSWORD
     )
@@ -46,7 +46,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS player (
             discord_id VARCHAR(50) PRIMARY KEY,
             riot_game_name VARCHAR(50) UNIQUE NOT NULL,
-            riot_game_tagline VARCHAR(50) UNIQUE NOT NULL,
+            riot_game_tagline VARCHAR(50) NOT NULL,
             riot_puuid VARCHAR(100) UNIQUE NOT NULL
         )
         """

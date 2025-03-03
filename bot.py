@@ -1,7 +1,6 @@
 import discord
 import os
 from dotenv import load_dotenv
-from discord.ext import commands
 import logging
 import datetime
 import platform
@@ -12,19 +11,29 @@ DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 BOT_PREFIX = os.getenv("BOT_PREFIX")
 
 # Setup logger
-logger = logging.getLogger("araminator")
-logger.setLevel(logging.DEBUG)
+araminator_logger = logging.getLogger("araminator")
+araminator_logger.setLevel(logging.DEBUG)
 handler = logging.FileHandler(
     filename=f"logs/araminator{datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")}.log",
     encoding="utf-8",
     mode="w",
 )
 handler.setFormatter(logging.Formatter("%(asctime)s :: %(levelname)-7s :: %(message)s"))
-logger.addHandler(handler)
+araminator_logger.addHandler(handler)
+
+
+discord_logger = logging.getLogger("discord")
+discord_logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
+handler.setFormatter(logging.Formatter("%(asctime)s :: %(levelname)-7s :: %(message)s"))
+discord_logger.addHandler(handler)
+
 
 console = logging.StreamHandler()
 console.setLevel(logging.INFO)
-logger.addHandler(console)
+araminator_logger.addHandler(console)
+
+logger = araminator_logger
 
 bot = discord.Bot()
 
@@ -36,7 +45,8 @@ intents.members = True
 # initialize database
 init_db()
 
-EXTENSIONS = ["cogs.player_commands"]
+
+EXTENSIONS = ["cogs.player_commands", "cogs.aram_commands"]
 
 # Load in all extensions (cogs)
 for extension in EXTENSIONS:
