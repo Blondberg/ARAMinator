@@ -135,6 +135,7 @@ class PlayerCommands(commands.Cog, name="Player commands"):
         await ctx.respond("Champion data synced.", ephemeral=True)
 
     @discord.slash_command(description="Display all champion names with their icons")
+    @commands.is_owner()
     async def display_champions(self, ctx: discord.ApplicationContext):
         db_connection = get_db_connection()
         cursor = db_connection.cursor()
